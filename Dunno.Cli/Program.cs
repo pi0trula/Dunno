@@ -1,11 +1,22 @@
-﻿using Dunno.Cli.CLI;
+﻿using Dunno.Cli.App;
 using Dunno.Cli.Commands;
+using Dunno.Cli.Repositories;
 using Dunno.Cli.Services;
 
-var service = new CommandService();
+const string connectionString = "Data Source=dunno.db";
 
-var listCommand = new ListCommand(service);
+var dbInitializer = new DatabaseInitializer(connectionString);
+await dbInitializer.InitializeAsync();
 
-var app = new CliApp(listCommand);
+var commandRepository = new CommandRepository(connectionString);
+var tagRepository = new TagRepository(connectionString);
 
-return app.Run(args);
+var commandService = new CommandService(commandRepository);
+var tagService = new TagService(tagRepository);
+
+var listCommand = new ListCommand(commandService);
+var tagCommand = new TagCommand(tagService);
+
+var app = new CliApp(listCommand, tagCommand);
+
+return await app.RunAsync(args);

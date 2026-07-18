@@ -4,9 +4,22 @@ namespace Dunno.Cli.Commands;
 
 public class ListCommand(CommandService service)
 {
-    public int Execute()
+    public async Task<int> ExecuteAsync(string? executable = null, string? tag = null)
     {
-        var commands = service.GetAll();
+        var task = (executable, tag) switch
+        {
+            (not null, _) => service.GetByExecutableAsync(executable),
+            (_, not null) => service.GetByTagAsync(tag),
+            _             => service.GetAllAsync()
+        };
+
+        var commands = await task;
+
+        if (commands.Count == 0)
+        {
+            Console.WriteLine("No commands found.");
+            return 0;
+        }
 
         foreach (var command in commands)
         {

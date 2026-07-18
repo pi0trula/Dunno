@@ -1,42 +1,22 @@
 ﻿using Dunno.Cli.Models;
+using Dunno.Cli.Repositories;
 
 namespace Dunno.Cli.Services;
 
-public class CommandService
+public class CommandService(CommandRepository repository)
 {
-    private readonly List<Command> _commands =
-    [
-        new()
-        {
-            Id = 1,
-            Executable = "git",
-            Arguments = ["init"],
-            Description = "Creates a new git repository",
-            CreatedAt = DateTime.Now,
-            Tags =
-            [
-                new Tag { Name = "git" }
-            ]
-        },
-
-        new()
-        {
-            Id = 2,
-            Executable = "git",
-            Arguments = ["add", "."],
-            Description = "Stages all files",
-            CreatedAt = DateTime.Now,
-            Tags =
-            [
-                new Tag { Name = "git" },
-                new Tag { Name = "stage" }
-            ]
-        }
-    ];
-
-
-    public List<Command> GetAll()
+    public Task<List<Command>> GetAllAsync()
     {
-        return _commands;
+        return repository.GetAllAsync();
+    }
+
+    public Task<List<Command>> GetByExecutableAsync(string executable)
+    {
+        return repository.GetByExecutableAsync(executable);
+    }
+
+    public Task<List<Command>> GetByTagAsync(string tagName)
+    {
+        return repository.GetByTagAsync(tagName);
     }
 }
