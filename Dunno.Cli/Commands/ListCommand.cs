@@ -10,7 +10,7 @@ public class ListCommand(CommandService service)
         {
             (not null, _) => service.GetByExecutableAsync(executable),
             (_, not null) => service.GetByTagAsync(tag),
-            _             => service.GetAllAsync()
+            _ => service.GetAllAsync()
         };
 
         var commands = await task;

@@ -15,7 +15,7 @@ public class DatabaseInitializer(string connectionString)
                                   CREATE TABLE IF NOT EXISTS Commands (
                                       Id INTEGER PRIMARY KEY AUTOINCREMENT,
                                       Executable TEXT NOT NULL,
-                                      ArgumentsJson TEXT NOT NULL DEFAULT '[]',
+                                      Arguments TEXT NOT NULL DEFAULT '',
                                       Description TEXT NOT NULL DEFAULT '',
                                       CreatedAt TEXT NOT NULL
                                   );

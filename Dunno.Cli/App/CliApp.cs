@@ -2,7 +2,7 @@
 
 namespace Dunno.Cli.App;
 
-public class CliApp(ListCommand listCommand, TagCommand tagCommand)
+public class CliApp(ListCommand listCommand, AddCommand addCommand, TagCommand tagCommand)
 {
     public async Task<int> RunAsync(string[] args)
     {
@@ -10,10 +10,11 @@ public class CliApp(ListCommand listCommand, TagCommand tagCommand)
             return args[0] switch
             {
                 "list" => await HandleListAsync(args),
+                "add" => await addCommand.ExecuteAsync(args),
                 "tag" => await tagCommand.ExecuteAsync(),
                 _ => UnknownCommand(args[0])
             };
-        
+
         PrintHelp();
         return 1;
     }
@@ -23,7 +24,7 @@ public class CliApp(ListCommand listCommand, TagCommand tagCommand)
         return args.Length switch
         {
             1 => await listCommand.ExecuteAsync(),
-            2 => await listCommand.ExecuteAsync(executable: args[1]),
+            2 => await listCommand.ExecuteAsync(args[1]),
             3 when args[1] == "tag" => await listCommand.ExecuteAsync(tag: args[2]),
             _ => UnknownCommand($"list {string.Join(" ", args.Skip(1))}")
         };

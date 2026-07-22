@@ -11,12 +11,13 @@ await dbInitializer.InitializeAsync();
 var commandRepository = new CommandRepository(connectionString);
 var tagRepository = new TagRepository(connectionString);
 
-var commandService = new CommandService(commandRepository);
 var tagService = new TagService(tagRepository);
+var commandService = new CommandService(commandRepository, tagService);
 
 var listCommand = new ListCommand(commandService);
+var addCommand = new AddCommand(commandService);
 var tagCommand = new TagCommand(tagService);
 
-var app = new CliApp(listCommand, tagCommand);
+var app = new CliApp(listCommand, addCommand, tagCommand);
 
 return await app.RunAsync(args);

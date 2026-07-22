@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-namespace Dunno.Cli.Models;
+﻿namespace Dunno.Cli.Models;
 
 public class Command
 {
@@ -8,13 +6,7 @@ public class Command
 
     public string Executable { get; set; } = "";
 
-    public string ArgumentsJson { get; set; } = "[]";
-
-    public List<string> Arguments
-    {
-        get => JsonSerializer.Deserialize<List<string>>(ArgumentsJson) ?? [];
-        set => ArgumentsJson = JsonSerializer.Serialize(value);
-    }
+    public string Arguments { get; set; } = "";
 
     public string Description { get; set; } = "";
 
@@ -23,5 +15,7 @@ public class Command
     public ICollection<Tag> Tags { get; set; } = [];
 
     public string FullCommand =>
-        $"{Executable} {string.Join(" ", Arguments)}";
+        string.IsNullOrEmpty(Arguments)
+            ? Executable
+            : $"{Executable} {Arguments}";
 }

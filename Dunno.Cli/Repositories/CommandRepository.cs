@@ -110,4 +110,39 @@ public class CommandRepository(string connectionString)
 
         return commandDictionary.Values.ToList();
     }
+
+    public async Task<int> AddAsync(Command command)
+    {
+        await using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+
+        var id = await connection.ExecuteScalarAsync<int>(
+            """
+            INSERT INTO Commands(Executable, Arguments, Description, CreatedAt)
+            VALUES(@Executable, @Arguments, @Description, datetime('now'));
+            SELECT last_insert_rowid()
+            """,
+            new
+            {
+                command.Executable,
+                command.Arguments,
+                command.Description
+            });
+
+        return id;
+    }
+
+    public async Task AddTagToCommandAsync(int commandId, int tagId)
+    {
+        await using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+
+        await connection.ExecuteScalarAsync<int>(
+            """
+            INSERT OR IGNORE INTO CommandTags(CommandId, TagId)
+            VALUES(@CommandId, @TagId);
+            """,
+            new { CommandId = commandId, TagId = tagId }
+        );
+    }
 }
