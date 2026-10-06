@@ -12,6 +12,7 @@ public class CliApp(ListCommand listCommand, AddCommand addCommand, TagCommand t
                 "list" => await HandleListAsync(args),
                 "add" => await addCommand.ExecuteAsync(args),
                 "tag" => await tagCommand.ExecuteAsync(),
+                "help" or "-h" or "--help" => PrintHelp(),
                 _ => UnknownCommand(args[0])
             };
 
@@ -30,13 +31,19 @@ public class CliApp(ListCommand listCommand, AddCommand addCommand, TagCommand t
         };
     }
 
-    private static void PrintHelp()
+    private static int PrintHelp()
     {
         Console.WriteLine("Available commands:");
-        Console.WriteLine("  list                Show all commands");
-        Console.WriteLine("  list <executable>   Filter by executable (e.g. list docker)");
-        Console.WriteLine("  list tag <name>     Filter by tag (e.g. list tag git)");
-        Console.WriteLine("  tag                 Show all tags");
+        Console.WriteLine("  list                  Show all commands");
+        Console.WriteLine("  list <executable>     Filter by executable (e.g. list docker)");
+        Console.WriteLine("  list tag <name>       Filter by tag (e.g. list tag git)");
+        Console.WriteLine("  tag                   Show all tags");
+        Console.WriteLine("  add <executable>      Add a command");
+        Console.WriteLine("    [--args \"...\"]      Optional: arguments to save");
+        Console.WriteLine("    [--desc \"...\"]      Optional: description to save");
+        Console.WriteLine("    [--tags \"...\"]      Optional: tags to save");
+
+        return 0;
     }
 
     private static int UnknownCommand(string command)
