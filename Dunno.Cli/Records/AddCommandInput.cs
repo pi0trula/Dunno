@@ -35,6 +35,8 @@ public record AddCommandInput(
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .ToList();
                     break;
+                default:
+                    throw new ArgumentException($"Unknown flag: {args[i]}. Allowed: --args, --desc, --tags");
             }
         }
 

@@ -11,7 +11,7 @@ public class AddCommand(CommandService commandService)
         {
             var addCommandInput = AddCommandInput.Parse(args);
             var command = await commandService.AddAsync(addCommandInput);
-            
+
             Console.WriteLine(
                 $"{command.Id}. {command.FullCommand}"
             );
@@ -26,6 +26,12 @@ public class AddCommand(CommandService commandService)
         catch (ArgumentException ae)
         {
             Console.WriteLine(ae.Message);
+            return 2;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Failed to save command");
+            return 1;
         }
 
         return 0;
