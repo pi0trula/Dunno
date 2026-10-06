@@ -20,8 +20,13 @@ public record AddCommandInput(
         var description = "";
         var tags = new List<string>();
 
-        for (int i = 2; i < args.Length; i++)
+        var seenFlags = new HashSet<string>();
+
+        for (var i = 2; i < args.Length; i++)
         {
+            if (args[i].StartsWith("--") && !seenFlags.Add(args[i]))
+                throw new ArgumentException($"Flag specified more than once: {args[i]}");
+
             switch (args[i])
             {
                 case "--args" when i + 1 < args.Length:
@@ -33,6 +38,7 @@ public record AddCommandInput(
                 case "--tags" when i + 1 < args.Length:
                     tags = args[++i]
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Distinct()
                         .ToList();
                     break;
                 default:
