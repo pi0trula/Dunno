@@ -1,9 +1,11 @@
-﻿using Dunno.Cli.App;
+﻿using Dunno.Cli;
+using Dunno.Cli.App;
 using Dunno.Cli.Commands;
 using Dunno.Cli.Repositories;
 using Dunno.Cli.Services;
 
-const string connectionString = "Data Source=dunno.db";
+var databasePath = DatabasePathResolver.Resolve();
+var connectionString = $"Data Source={databasePath}";
 
 var dbInitializer = new DatabaseInitializer(connectionString);
 await dbInitializer.InitializeAsync();
