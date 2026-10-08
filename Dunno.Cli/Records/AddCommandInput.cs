@@ -38,6 +38,9 @@ public record AddCommandInput(
                 case "--tags" when i + 1 < args.Length:
                     tags = args[++i]
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Where(t => t.Length > 0)
+                        .Select(t => t.Trim())
+                        .Where(t => t.Length > 0)
                         .Distinct()
                         .ToList();
                     break;
