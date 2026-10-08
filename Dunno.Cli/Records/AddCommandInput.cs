@@ -24,28 +24,35 @@ public record AddCommandInput(
 
         for (var i = 2; i < args.Length; i++)
         {
-            if (args[i].StartsWith("--") && !seenFlags.Add(args[i]))
-                throw new ArgumentException($"Flag specified more than once: {args[i]}");
+            var flag = args[i];
 
-            switch (args[i])
+            if (flag is not ("--args" or "--desc" or "--tags"))
+                throw new ArgumentException($"Unknown flag: {flag}. Allowed: --args, --desc, --tags");
+
+            if (!seenFlags.Add(flag))
+                throw new ArgumentException($"Flag specified more than once: {flag}");
+
+            if (i + 1 >= args.Length || args[i + 1] is ("--args" or "--desc" or "--tags"))
+                throw new ArgumentException($"Missing value for {flag}.");
+
+            var value = args[++i];
+
+            switch (flag)
             {
-                case "--args" when i + 1 < args.Length:
-                    arguments = args[++i];
+                case "--args":
+                    arguments = value;
                     break;
-                case "--desc" when i + 1 < args.Length:
-                    description = args[++i];
+                case "--desc":
+                    description = value;
                     break;
-                case "--tags" when i + 1 < args.Length:
-                    tags = args[++i]
+                case "--tags":
+                    tags = value
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Where(t => t.Length > 0)
                         .Select(t => t.Trim())
                         .Where(t => t.Length > 0)
                         .Distinct()
                         .ToList();
                     break;
-                default:
-                    throw new ArgumentException($"Unknown flag: {args[i]}. Allowed: --args, --desc, --tags");
             }
         }
 
