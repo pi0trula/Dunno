@@ -7,9 +7,15 @@ public record AddCommandInput(
     List<string> Tags
 )
 {
+    private const string ArgsFlag = "--args";
+    private const string DescFlag = "--desc";
+    private const string TagsFlag = "--tags";
+
+    public static readonly IReadOnlyList<string> KnownFlags = [ArgsFlag, DescFlag, TagsFlag];
+
     public static AddCommandInput Parse(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 2 || string.IsNullOrWhiteSpace(args[1]) || args[1].StartsWith('-'))
             throw new ArgumentException(
                 "Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]"
             );
@@ -26,40 +32,35 @@ public record AddCommandInput(
         {
             var flag = args[i];
 
-            if (flag is not ("--args" or "--desc" or "--tags"))
+            if (!KnownFlags.Contains(flag))
                 throw new ArgumentException($"Unknown flag: {flag}. Allowed: --args, --desc, --tags");
 
             if (!seenFlags.Add(flag))
                 throw new ArgumentException($"Flag specified more than once: {flag}");
 
-            if (i + 1 >= args.Length || args[i + 1] is ("--args" or "--desc" or "--tags"))
+            if (i + 1 >= args.Length || KnownFlags.Contains(args[i + 1]))
                 throw new ArgumentException($"Missing value for {flag}.");
 
             var value = args[++i];
 
             switch (flag)
             {
-                case "--args":
+                case ArgsFlag:
                     arguments = value;
                     break;
-                case "--desc":
+                case DescFlag:
                     description = value;
                     break;
-                case "--tags":
+                case TagsFlag:
                     tags = value
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
                         .Select(t => t.Trim())
                         .Where(t => t.Length > 0)
-                        .Distinct()
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToList();
                     break;
             }
         }
-
-        if (string.IsNullOrWhiteSpace(executable))
-            throw new ArgumentException(
-                "Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]"
-            );
 
         return new AddCommandInput(executable, arguments, description, tags);
     }
