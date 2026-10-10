@@ -59,6 +59,9 @@ public record AddCommandInput(
                         .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToList();
                     break;
+                default:
+                    throw new InvalidOperationException(
+                        $"Flag '{flag}' is listed in {nameof(KnownFlags)} but has no handler.");
             }
         }
 
