@@ -1,3 +1,4 @@
+using Dunno.Cli.Errors;
 using Dunno.Cli.Records;
 
 namespace Dunno.Cli.Tests;
@@ -5,11 +6,17 @@ namespace Dunno.Cli.Tests;
 public class AddCommandInputTests
 {
     [Fact]
+    public void Usage_MatchesExpectedText() =>
+        Assert.Equal(
+            "Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]",
+            AddCommandErrors.Usage);
+
+    [Fact]
     public void Parse_NoArguments_ThrowsUsage()
     {
         var ex = Assert.Throws<ArgumentException>(() => AddCommandInput.Parse(["add"]));
 
-        Assert.Equal("Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]", ex.Message);
+        Assert.Equal(AddCommandErrors.Usage, ex.Message);
     }
 
     [Theory]
@@ -19,7 +26,7 @@ public class AddCommandInputTests
     {
         var ex = Assert.Throws<ArgumentException>(() => AddCommandInput.Parse(["add", executable]));
 
-        Assert.Equal("Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]", ex.Message);
+        Assert.Equal(AddCommandErrors.Usage, ex.Message);
     }
 
     [Theory]
@@ -34,7 +41,7 @@ public class AddCommandInputTests
             flag
         ]));
 
-        Assert.Equal("Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]", ex.Message);
+        Assert.Equal(AddCommandErrors.Usage, ex.Message);
     }
 
     [Fact]
@@ -43,7 +50,7 @@ public class AddCommandInputTests
         var ex = Assert.Throws<ArgumentException>(() =>
             AddCommandInput.Parse(["add", "--desc", "show status"]));
 
-        Assert.Equal("Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]", ex.Message);
+        Assert.Equal(AddCommandErrors.Usage, ex.Message);
     }
 
     [Theory]
@@ -56,7 +63,7 @@ public class AddCommandInputTests
             flag
         ]));
 
-        Assert.Equal($"Unknown flag: {flag}. Allowed: --args, --desc, --tags", ex.Message);
+        Assert.Equal(AddCommandErrors.UnknownFlag(flag), ex.Message);
     }
 
     [Theory]
@@ -71,7 +78,7 @@ public class AddCommandInputTests
             flag, "bar"
         ]));
 
-        Assert.Equal($"Flag specified more than once: {flag}", ex.Message);
+        Assert.Equal(AddCommandErrors.DuplicateFlag(flag), ex.Message);
     }
 
     [Theory]
@@ -85,7 +92,7 @@ public class AddCommandInputTests
             flag
         ]));
 
-        Assert.Equal($"Missing value for {flag}.", ex.Message);
+        Assert.Equal(AddCommandErrors.MissingValue(flag), ex.Message);
     }
 
     [Theory]
@@ -103,7 +110,7 @@ public class AddCommandInputTests
             nextFlag, "foo"
         ]));
 
-        Assert.Equal($"Missing value for {flag}.", ex.Message);
+        Assert.Equal(AddCommandErrors.MissingValue(flag), ex.Message);
     }
 
     [Theory]

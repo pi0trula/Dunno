@@ -1,3 +1,5 @@
+using Dunno.Cli.Errors;
+
 namespace Dunno.Cli.Records;
 
 public record AddCommandInput(
@@ -16,9 +18,7 @@ public record AddCommandInput(
     public static AddCommandInput Parse(string[] args)
     {
         if (args.Length < 2 || string.IsNullOrWhiteSpace(args[1]) || args[1].StartsWith('-'))
-            throw new ArgumentException(
-                "Usage: add <executable> [--args \"...\"] [--desc \"...\"] [--tags \"...\"]"
-            );
+            throw new ArgumentException(AddCommandErrors.Usage);
 
         var executable = args[1];
 
@@ -33,13 +33,13 @@ public record AddCommandInput(
             var flag = args[i];
 
             if (!KnownFlags.Contains(flag))
-                throw new ArgumentException($"Unknown flag: {flag}. Allowed: --args, --desc, --tags");
+                throw new ArgumentException(AddCommandErrors.UnknownFlag(flag));
 
             if (!seenFlags.Add(flag))
-                throw new ArgumentException($"Flag specified more than once: {flag}");
+                throw new ArgumentException(AddCommandErrors.DuplicateFlag(flag));
 
             if (i + 1 >= args.Length || KnownFlags.Contains(args[i + 1]))
-                throw new ArgumentException($"Missing value for {flag}.");
+                throw new ArgumentException(AddCommandErrors.MissingValue(flag));
 
             var value = args[++i];
 
