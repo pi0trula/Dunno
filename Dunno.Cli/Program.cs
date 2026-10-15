@@ -14,7 +14,7 @@ var commandRepository = new CommandRepository(connectionString);
 var tagRepository = new TagRepository(connectionString);
 
 var tagService = new TagService(tagRepository);
-var commandService = new CommandService(commandRepository, tagService);
+var commandService = new CommandService(commandRepository);
 
 var listCommand = new ListCommand(commandService);
 var addCommand = new AddCommand(commandService);

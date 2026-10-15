@@ -111,25 +111,45 @@ public class CommandRepository(string connectionString)
         return commandDictionary.Values.ToList();
     }
 
-    public async Task<int> AddAsync(Command command)
+    public async Task<Command> AddAsync(Command command, IEnumerable<string> tagNames)
     {
         await using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
 
-        var id = await connection.ExecuteScalarAsync<int>(
+        command.Id = await connection.ExecuteScalarAsync<int>(
             """
             INSERT INTO Commands(Executable, Arguments, Description, CreatedAt)
             VALUES(@Executable, @Arguments, @Description, datetime('now'));
             SELECT last_insert_rowid()
             """,
-            new
-            {
-                command.Executable,
-                command.Arguments,
-                command.Description
-            });
+            new { command.Executable, command.Arguments, command.Description },
+            transaction);
 
-        return id;
+        foreach (var name in tagNames)
+        {
+            var tagId = await connection.ExecuteScalarAsync<int>(
+                """
+                INSERT INTO Tags(Name)
+                SELECT @Name WHERE NOT EXISTS (SELECT 1 FROM Tags WHERE Name = @Name);
+                SELECT Id FROM Tags WHERE Name = @Name
+                """,
+                new { Name = name },
+                transaction);
+
+            await connection.ExecuteAsync(
+                """
+                INSERT OR IGNORE INTO CommandTags(CommandId, TagId)
+                VALUES(@CommandId, @TagId)
+                """,
+                new { CommandId = command.Id, TagId = tagId },
+                transaction);
+
+            command.Tags.Add(new Tag { Id = tagId, Name = name });
+        }
+
+        await transaction.CommitAsync();
+        return command;
     }
 
     public async Task AddTagToCommandAsync(int commandId, int tagId)

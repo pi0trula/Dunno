@@ -4,7 +4,7 @@ using Dunno.Cli.Repositories;
 
 namespace Dunno.Cli.Services;
 
-public class CommandService(CommandRepository repository, TagService tagService)
+public class CommandService(CommandRepository repository)
 {
     public async Task<List<Command>> GetAllAsync()
     {
@@ -18,7 +18,7 @@ public class CommandService(CommandRepository repository, TagService tagService)
 
     public async Task<List<Command>> GetByTagAsync(string tagName)
     {
-        return await repository.GetByTagAsync(tagName);
+        return await repository.GetByTagAsync(tagName.Trim().ToLowerInvariant());
     }
 
     public async Task<Command> AddAsync(AddCommandInput input)
@@ -27,15 +27,6 @@ public class CommandService(CommandRepository repository, TagService tagService)
         {
             Executable = input.Executable, Arguments = input.Arguments, Description = input.Description
         };
-        command.Id = await repository.AddAsync(command);
-        foreach (var name in input.Tags)
-        {
-            var tag = await tagService.GetByNameAsync(name) ??
-                      new Tag { Id = await tagService.AddAsync(name), Name = name };
-            await repository.AddTagToCommandAsync(command.Id, tag.Id);
-            command.Tags.Add(tag);
-        }
-
-        return command;
+        return await repository.AddAsync(command, input.Tags);
     }
 }

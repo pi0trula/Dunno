@@ -54,9 +54,9 @@ public record AddCommandInput(
                 case TagsFlag:
                     tags = value
                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(t => t.Trim())
+                        .Select(t => t.Trim().ToLowerInvariant())
                         .Where(t => t.Length > 0)
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Distinct()
                         .ToList();
                     break;
                 default:
