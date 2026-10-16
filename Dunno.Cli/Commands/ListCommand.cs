@@ -4,16 +4,25 @@ namespace Dunno.Cli.Commands;
 
 public class ListCommand(CommandService service)
 {
-    public async Task<int> ExecuteAsync(string? executable = null, string? tag = null)
+    public async Task<int> ExecuteAsync(string[] args)
     {
-        var task = (executable, tag) switch
+        var filter = args.Skip(1).ToArray();
+
+        var commands = filter switch
         {
-            (not null, _) => service.GetByExecutableAsync(executable),
-            (_, not null) => service.GetByTagAsync(tag),
-            _ => service.GetAllAsync()
+            [] => await service.GetAllAsync(),
+            ["tag", var tag] => await service.GetByTagAsync(tag),
+            ["tag"] => null,
+            [var executable] => await service.GetByExecutableAsync(executable),
+            _ => null
         };
 
-        var commands = await task;
+        if (commands is null)
+        {
+            Console.WriteLine($"Invalid arguments: list {string.Join(" ", filter)}");
+            Console.WriteLine("Usage: list | list <executable> | list tag <name>");
+            return 2;
+        }
 
         if (commands.Count == 0)
         {

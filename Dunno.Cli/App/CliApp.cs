@@ -9,7 +9,7 @@ public class CliApp(ListCommand listCommand, AddCommand addCommand, TagCommand t
         if (args.Length != 0)
             return args[0] switch
             {
-                "list" => await HandleListAsync(args),
+                "list" => await listCommand.ExecuteAsync(args),
                 "add" => await addCommand.ExecuteAsync(args),
                 "tag" => await tagCommand.ExecuteAsync(),
                 "help" or "-h" or "--help" => PrintHelp(),
@@ -18,17 +18,6 @@ public class CliApp(ListCommand listCommand, AddCommand addCommand, TagCommand t
 
         PrintHelp();
         return 1;
-    }
-
-    private async Task<int> HandleListAsync(string[] args)
-    {
-        return args.Length switch
-        {
-            1 => await listCommand.ExecuteAsync(),
-            2 => await listCommand.ExecuteAsync(args[1]),
-            3 when args[1] == "tag" => await listCommand.ExecuteAsync(tag: args[2]),
-            _ => UnknownCommand($"list {string.Join(" ", args.Skip(1))}")
-        };
     }
 
     private static int PrintHelp()
